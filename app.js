@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
 
 const app = express();
 
@@ -27,6 +28,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use('/users', users);
+app.post('/signin', login);
+app.post('/signup', createUser);
 app.use('/cards', cards);
 app.use(error);
 

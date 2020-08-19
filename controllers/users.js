@@ -6,6 +6,13 @@ function error(res) {
   res.status(404).send({ message: 'Пользователя с таким ID не существует' });
 }
 
+function createUserError(err) {
+  if (err.code === 11000) {
+    return { message: 'Пользователь с таким Email уже существует' };
+  }
+  return { message: err.message };
+}
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -33,7 +40,7 @@ module.exports.createUser = (req, res) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => res.status(400).send(createUserError(err)));
 };
 
 module.exports.updateUser = (req, res) => {
@@ -69,12 +76,13 @@ module.exports.updateAvatar = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key');
-      res.send({ token });
+      res.cookie('jwt', token, { maxAge: 3600000, httpOnly: true })
+        .end();
     })
-    .catch(() => {
-      res.status(401).send({ message: 'Пользователь с такими email и паролем не найден' });
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
     });
 };
