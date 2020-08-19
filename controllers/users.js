@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 function error(res) {
@@ -64,4 +65,16 @@ module.exports.updateAvatar = (req, res) => {
       }
     })
     .catch(() => error(res));
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key');
+      res.send({ token });
+    })
+    .catch(() => {
+      res.status(401).send({ message: 'Пользователь с такими email и паролем не найден' });
+    });
 };
