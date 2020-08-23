@@ -13,6 +13,11 @@ function createUserError(err) {
   return { message: err.message };
 }
 
+function passwordValidation(password) {
+  const regex = /[A-Za-z0-9]{8,}/;
+  return regex.test(password);
+}
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -35,12 +40,18 @@ module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email,
   } = req.body;
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(400).send(createUserError(err)));
+  if (passwordValidation(req.body.password)) {
+    bcrypt.hash(req.body.password, 10)
+      .then((hash) => User.create({
+        name, about, avatar, email, password: hash,
+      }))
+      .then((user) => res.send({
+        id: user._id, about: user.about, avatar: user.avatar, email: user.email,
+      }))
+      .catch((err) => res.status(400).send(createUserError(err)));
+  } else {
+    res.status(400).send({ message: 'Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв' });
+  }
 };
 
 module.exports.updateUser = (req, res) => {

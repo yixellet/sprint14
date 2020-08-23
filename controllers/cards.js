@@ -19,15 +19,23 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findOneAndRemove({ _id: req.params.cardId })
+  Card.findById(req.params.cardId)
     .then((card) => {
-      if (card) {
-        res.send({ data: card });
+      if (String(card.owner) === String(req.user._id)) {
+        Card.findByIdAndRemove(card._id)
+          .then((cardo) => {
+            if (cardo) {
+              res.send({ data: cardo });
+            } else {
+              error(res);
+            }
+          })
+          .catch(() => error(res));
       } else {
-        error(res);
+        res.status(401).send({ message: 'Удалять карточки может только их владелец' });
       }
     })
-    .catch(() => error(res));
+    .catch((err) => res.status(401).send({ message: err.message }));
 };
 
 module.exports.likeCard = (req, res) => {
