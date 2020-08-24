@@ -32,7 +32,7 @@ module.exports.deleteCard = (req, res) => {
           })
           .catch(() => error(res));
       } else {
-        res.status(401).send({ message: 'Удалять карточки может только их владелец' });
+        res.status(403).send({ message: 'Удалять карточки может только их владелец' });
       }
     })
     .catch((err) => res.status(401).send({ message: err.message }));
