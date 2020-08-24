@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const secretKey = require('../secretKey');
 
 function error(res) {
   res.status(404).send({ message: 'Пользователя с таким ID не существует' });
@@ -89,7 +90,7 @@ module.exports.login = (req, res) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, secretKey.secretKey, { expiresIn: '7d' });
       res.cookie('jwt', token, { maxAge: 3600000, httpOnly: true })
         .end();
     })

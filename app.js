@@ -13,7 +13,7 @@ const error = (req, res, next) => {
   next();
 };
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect('mongodb://localhost:27017/mesto', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,

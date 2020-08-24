@@ -35,7 +35,7 @@ module.exports.deleteCard = (req, res) => {
         res.status(403).send({ message: 'Удалять карточки может только их владелец' });
       }
     })
-    .catch((err) => res.status(401).send({ message: err.message }));
+    .catch(() => error(res));
 };
 
 module.exports.likeCard = (req, res) => {
