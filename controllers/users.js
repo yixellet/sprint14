@@ -6,11 +6,11 @@ function error(res) {
   res.status(404).send({ message: 'Пользователя с таким ID не существует' });
 }
 
-function createUserError(err) {
+function createUserError(req, res, err) {
   if (err.code === 11000) {
-    return { message: 'Пользователь с таким Email уже существует' };
+    return res.status(409).send({ message: 'Пользователь с таким Email уже существует' });
   }
-  return { message: err.message };
+  return res.status(500).send({ message: err.message });
 }
 
 function passwordValidation(password) {
@@ -48,7 +48,7 @@ module.exports.createUser = (req, res) => {
       .then((user) => res.send({
         id: user._id, about: user.about, avatar: user.avatar, email: user.email,
       }))
-      .catch((err) => res.status(400).send(createUserError(err)));
+      .catch((err) => createUserError(req, res, err));
   } else {
     res.status(400).send({ message: 'Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв' });
   }
